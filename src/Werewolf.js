@@ -479,6 +479,7 @@ class App extends Component {
             playerNames: [],
             events: [],
             night: 1,
+            logs: [],
         })
     }
 
