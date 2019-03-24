@@ -58,3 +58,11 @@ a :hover {
 i {
     font-size: 1.5em;
 }
+
+input.roleInput {
+    width: 80px;
+    text-align: center;
+    font-size: 1em;
+    color: red;
+    font-weight: bold;
+}

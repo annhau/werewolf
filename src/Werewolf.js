@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+import { CSSTransitionGroup } from 'react-transition-group' // ES6
+
 import './App.css';
 
 
@@ -74,12 +76,14 @@ class SetUpPlayer extends Component {
     addPlayer(e) {
         e.preventDefault();
         let playerNames = this.state.playerNames.slice();
-        let inp = capitalize(this.refs.player.value);
-        if (inp !== "" && !playerNames.includes(inp)) {
+        let inp = capitalize(this.refs.player.value).trim();
+        if (inp === ""){
+            this.setState({error: "Do not use empty string"})
+        } else if (playerNames.includes(inp)) {
+            this.setState({error: "Do not use the same name"});
+        } else {
             playerNames.push(inp);
             this.setState({'playerNames': playerNames, error: null})
-        } else {
-            this.setState({error: "Do not use the same name"})
         }
         this.refs.player.focus();
         this.refs.player.value = "";
@@ -165,7 +169,7 @@ class SetUpRole extends Component {
                           this.changeSelectRemain()
                       }}> <i className="fas fa-plus-circle text-white" />
                 </span>
-                <input ref={role} className="form-control float-right" style={{width: "80px", textAlign: "center"}} type="number" readOnly/>
+                <input ref={role} className="form-control float-right roleInput" type="text" readOnly/>
                 <span className="btn float-right" onClick={() => {
                     this.refs[role].value = this.refs[role].value > 0 ? Number(this.refs[role].value) - 1 : this.refs[role].value;
                     this.changeSelectRemain();
@@ -212,7 +216,8 @@ class Night extends Component {
             if (checkbox.checked) {
                 actions[this.state.currentIndex] = index;
                 checkbox.checked = false;
-                refDiv.style.background = 'lightcoral';
+                refDiv.style.background = '';
+                refDiv.style.color = '';
             }
         });
 
@@ -236,8 +241,10 @@ class Night extends Component {
             let divRef = this.refs[player.pname];
             if (divRef.childNodes[0].checked) {
                 divRef.style.background = 'red';
+                divRef.style.color = 'white';
             } else {
                 divRef.style.background = 'lightcoral';
+                divRef.style.color = '';
             }
         });
     }
@@ -256,9 +263,9 @@ class Night extends Component {
         return (
             <div>
                 <h2>Night {this.state.night}</h2>
-                <h3>Turn of {this.state.currentPlayer.pname}</h3>
+                <h3>Turn of <span className="text-white"> {this.state.currentPlayer.pname}</span></h3>
                 <form onSubmit={(e) => this.addAction.bind(this)(e)}>
-                    {row}
+                     {row}
                     <button type="submit" className="mt-3 btn btn-danger">Next</button>
                 </form>
             </div>
@@ -282,8 +289,10 @@ class Day extends Component {
             let divRef = this.refs[player.pname];
             if (divRef.childNodes[0].checked) {
                 divRef.style.background = 'red';
+                divRef.style.color = 'white';
             } else {
-                divRef.style.background = 'lightcoral';
+                divRef.style.background = '';
+                divRef.style.color = '';
             }
         });
     }
@@ -313,6 +322,8 @@ class Day extends Component {
                     ? <div>
                         <h3>{this.props.gameOver}</h3>
                         <ul>{originPlayers}</ul>
+                        <h3>History</h3>
+                        <ul>{this.props.logs}</ul>
                         <button onClick={() => this.props.restart()} className="btn btn-danger">New game</button>
                     </div>
                     : <div>
@@ -350,6 +361,7 @@ class App extends Component {
             players: [],
             playerNames: [],
             night: 1,
+            logs: [],
         }
     }
 
@@ -396,6 +408,8 @@ class App extends Component {
 
         // Handle Actions
         let activeWolf = this.getActiveWolf(); console.log(activeWolf);
+        let logs = this.state.logs;
+        logs.push(<p><b>Night {this.state.night}</b></p>);
         ROLES.forEach(role => {
             players.forEach((player, index) => {
                 if (player.role === role) {
@@ -405,6 +419,8 @@ class App extends Component {
                     } else if (player === activeWolf) {
                         player.do_action(target);
                     }
+                    // Add logs
+                    logs.push(<li>{player.role}{player.active_wolf} choose {target.role}{target.active_wolf}</li>)
                 }
             })
         });
@@ -438,7 +454,8 @@ class App extends Component {
             phase: 'day',
             events: events,
             players: players,
-            gameOver: this.gameOver(players)
+            gameOver: this.gameOver(players),
+            logs: logs
         });
     }
 
@@ -502,6 +519,7 @@ class App extends Component {
                         players={this.state.players}
                         originPlayers={this.state.originPlayers}
                         executePlayer={this.executePlayer.bind(this)}
+                        logs={this.state.logs}
                         gameOver={this.state.gameOver} restart={this.restart.bind(this)}/>;
         else
             return <div> {phase} </div>

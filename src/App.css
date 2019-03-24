@@ -31,3 +31,54 @@
     transform: rotate(360deg);
   }
 }
+
+.fadeOut-enter {
+    opacity: 0.01;
+}
+
+.fadeOut-enter.fadeOut-enter-active {
+    opacity: 1;
+    transition: opacity 2000ms ease-in;
+}
+
+.fadeOut-leave {
+    opacity: 1;
+}
+
+.fadeOut-leave.fadeOut-leave-active {
+    opacity: 0.01;
+    transition: opacity 500ms ease-out;
+}
+
+.fadeOut-appear {
+    opacity: 0.01;
+}
+
+.fadeOut-appear.fadeOut-appear-active {
+    opacity: 1;
+    transition: opacity 500ms ease-in;
+}
+
+@keyframes changeColor {
+    from {color: red;}
+    to {color: black;}
+}
+
+@keyframes shake {
+    10%, 90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%, 80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%, 50%, 70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%, 60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}
+
