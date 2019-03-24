@@ -148,12 +148,13 @@ class SetUpRole extends Component {
 
     render() {
         let row = [];
+        let error = this.state.numPlayer < 0 ? <p className="text-danger"> Number of roles is not correct </p> : null;
         ROLES.forEach(role => row.push(
             <li className="list-group-item list-group-item-action" key={role}>
                 <div className="row">
                     <div className="col-10 text-center">{role}</div>
                     <div className="col-2 text-left">
-                        <input ref={role} className="form-control float-right" style={{width: "50px"}} type="number"
+                        <input ref={role} className="form-control float-right" style={{width: "100px"}} type="number"
                                min="0"
                                onChange={this.changeSelectRemain.bind(this)}/>
                     </div>
@@ -162,12 +163,15 @@ class SetUpRole extends Component {
         );
         return (
             <div>
-                <h3>Select roles: {this.state.numPlayer > 0 ? this.state.numPlayer + ' remain' : ''}</h3>
+                <h3>Select roles: {this.state.numPlayer > 0 ? this.state.numPlayer + ' remain' : null}
+                </h3>
+                {this.state.error ? <p className="text-danger"> this.state.error </p> : null}
                 <ul className="list-group">
                     {row}
                 </ul>
                 <br/>
-                <button className="btn btn-primary" onClick={this.createPlayers.bind(this)}>Done</button>
+                {error ? error :
+                    <button className="btn btn-primary" onClick={this.createPlayers.bind(this)}>Done</button>}
             </div>
         );
     }
@@ -190,7 +194,8 @@ class Night extends Component {
         let actions = this.state.actions;
         this.props.players.forEach((player, index) => {
             if (this.refs[player.pname].checked) {
-                actions[this.state.currentIndex] = index
+                actions[this.state.currentIndex] = index;
+                this.refs[player.pname].checked = false;
             }
         });
 
@@ -213,7 +218,8 @@ class Night extends Component {
         let row = [];
         this.props.players.forEach((player, index) => {
             let inp = <div key={player.pname} className="custom-control custom-radio">
-                <input ref={player.pname} type="radio" id={player.pname} name="target" className="custom-control-input"/>
+                <input ref={player.pname} type="radio" id={player.pname} name="target" className="custom-control-input"
+                       required/>
                 <label className="custom-control-label" htmlFor={player.pname}>{player.pname}</label>
             </div>;
             row.push(inp)
@@ -233,31 +239,84 @@ class Night extends Component {
 
 
 class Day extends Component {
+    executePlayer(e) {
+        e.preventDefault();
+        this.props.players.forEach((player, index) => {
+            if (this.refs[player.pname].checked) {
+                this.props.executePlayer(player)
+            }
+        });
+    }
+
     render() {
+        let row = [];
+        this.props.players.forEach((player, index) => {
+            let inp = <div key={player.pname} className="custom-control custom-radio">
+                <input ref={player.pname} type="radio" id={player.pname} name="target" className="custom-control-input"
+                       required/>
+                <label className="custom-control-label" htmlFor={player.pname}>{player.pname}</label>
+            </div>;
+            row.push(inp)
+        });
+        let originPlayers = this.props.originPlayers.map(player =>
+            <li>{player.pname}: {player.role} {player.active_wolf}</li>);
         return (
             <div>
                 <h3>Events: </h3>
                 <ul>
-                    {this.props.events}
+                    {this.props.events ? this.props.events : "Nothing happened"}
                 </ul>
+
+                {this.props.gameOver !== null
+                    ? <div>
+                        <h3>{this.props.gameOver}</h3>
+                        <ul>{originPlayers}</ul>
+                        <button onClick={() => this.props.restart()} className="btn btn-primary">New game</button>
+                    </div>
+                    : <div>
+                        <h3> Who's the wolf ? </h3>
+                        <form onSubmit={(e) => this.executePlayer.bind(this)(e)}>
+                            {row}
+                            <button type="submit" className="mt-3 mr-3 btn btn-primary">Execute</button>
+                            <button onClick={() => this.props.nextPhase()} className="mt-3 btn btn-secondary">Skip
+                            </button>
+                        </form>
+
+                    </div>
+                }
             </div>
         );
     }
 }
 
 
-// const DUMP_PLAYERS = [new Player('Albert', 'Werewolf'), new Player('Alice', 'Seer'), new Player('Golden', 'Villager')];
+let albert = new Player('Albert', 'Werewolf');
+albert.active_wolf = 1;
+let goldy = new Player('Goldy', 'Werewolf');
+goldy.active_wolf = 2;
+const DUMP_PLAYERS = [albert, goldy,
+    new Player('Alice', 'Seer'),
+    new Player('Golden', 'Hunter'),
+    new Player('Goldeny', 'Villager'),
+];
+
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            // phase: 'night',
-            // players: DUMP_PLAYERS,
-            phase: 'setUpName',
-            players: [],
+            phase: 'night',
+            players: DUMP_PLAYERS,
+            // phase: 'setUpName',
+            // players: [],
             playerNames: [],
             night: 1,
         }
+    }
+
+    nextPhase() {
+        this.setState((state, props) => {
+            return {phase: 'night', night: state.night + 1}
+        })
     }
 
     submitPlayerNames(names) {
@@ -268,51 +327,116 @@ class App extends Component {
     }
 
     submitPlayer(players) {
-        this.setState({
-            players: players,
-            phase: 'night'
-        })
+        let gameOver = this.gameOver(players);
+        if (gameOver) {
+            this.setState({
+                players: players,
+                originPlayers: players.slice(0),
+                phase: 'day',
+                gameOver: gameOver
+            })
+        } else {
+            this.setState({
+                players: players,
+                originPlayers: players.slice(0),
+                phase: 'night'
+            })
+        }
     }
 
     submitActions(actions) {
-        console.log(actions);
-        let events = [];
         let players = this.state.players;
+
+        // Handle Actions
         let bitten = false;
         ROLES.forEach(role => {
             players.forEach((player, index) => {
                 if (player.role === role) {
                     let target = players[actions[index]];
-                    console.log(player.pname, player.active_wolf);
-                    player.do_action(target);
-                    console.log(target.pname, target.bitten);
-                    // if (player.role !== 'Werewolf') {
-                    //     player.do_action(target);
-                    // } else if (!bitten) {
-                    //     player.do_action(target);
-                    //     bitten = true;
-                    // }
+                    if (player.role !== 'Werewolf') {
+                        player.do_action(target);
+                    } else if (!bitten) {
+                        player.do_action(target);
+                        bitten = true;
+                    }
                 }
             })
         });
+
+        // Handle events
+        let dead_players = [];
+        let events = [];
         players.forEach((player) => {
-            if (player.bitten)
-                events.push(<li key={player.pname}>{player.pname} died.</li>);
+            if (player.bitten) {
+                events.push(<li key={player.id}>{player.pname} died.</li>);
+                dead_players.push(player);
+                if (player.role === 'Hunter' && player.previous_target !== player) {
+                    events.push(<li key={player.previous_target.id}>{player.previous_target.pname} died.</li>);
+                    dead_players.push(player.previous_target);
+                }
+            }
             if (player.muted)
-                events.push(<li key={player.pname}>{player.pname} is muted.</li>);
+                events.push(<li key={player.id}>{player.pname} is muted.</li>);
             if (player.seer) {
                 if (player.bitten)
-                    events.push(<li key={player.pname}>{player.pname} needs to tell truth</li>);
+                    events.push(<li key={player.id}>{player.pname} needs to tell truth</li>);
                 else
-                    events.push(<li key={player.pname}>{player.pname} needs to tell truth (truth: {player.previous_target.pname})</li>)
+                    events.push(<li key={player.id}>{player.pname} needs to tell truth
+                        (truth: {player.previous_target.pname})</li>)
             }
             player.init_stats();
         });
+
+        players = players.filter((e) => !dead_players.includes(e));
         this.setState({
             phase: 'day',
-            events: events
+            events: events,
+            players: players,
+            gameOver: this.gameOver(players)
         });
-        events.forEach(e => console.log(e.props));
+    }
+
+    gameOver(players) {
+        let countVillagers = 0;
+        players.forEach(player => {
+            countVillagers = player.role === 'Werewolf' ? countVillagers - 1 : countVillagers + 1
+        });
+        if (countVillagers === players.length)
+            return 'Villagers won.';
+        else if (countVillagers <= 0)
+            return 'Wolfs won.';
+        else
+            return null
+    }
+
+    restart() {
+        this.setState({
+            phase: 'setUpName',
+            players: [],
+            playerNames: [],
+            night: 1,
+        })
+    }
+
+    executePlayer(player) {
+        let players = this.state.players.filter(e => e !== player);
+        let gameOver = this.gameOver(players);
+        if (!gameOver) {
+            this.setState((state, props) => {
+                return {
+                    players: players,
+                    phase: 'night',
+                    night: state.night + 1
+                }
+            })
+        } else {
+            this.setState({
+                players: players,
+                phase: 'day',
+                gameOver: gameOver
+            })
+        }
+
     }
 
     render() {
@@ -323,9 +447,15 @@ class App extends Component {
         else if (phase === 'setUpRole')
             return <SetUpRole playerNames={this.state.playerNames} submitPlayer={this.submitPlayer.bind(this)}/>;
         else if (phase === 'night')
-            return <Night players={this.state.players} night={this.state.night} submitActions={this.submitActions.bind(this)}/>;
+            return <Night players={this.state.players} night={this.state.night}
+                          submitActions={this.submitActions.bind(this)}/>;
         else if (phase === 'day')
-            return <Day events={this.state.events}/>;
+            return <Day events={this.state.events}
+                        nextPhase={this.nextPhase.bind(this)}
+                        players={this.state.players}
+                        originPlayers={this.state.originPlayers}
+                        executePlayer={this.executePlayer.bind(this)}
+                        gameOver={this.state.gameOver} restart={this.restart.bind(this)}/>;
         else
             return <div> {phase} </div>
     }
