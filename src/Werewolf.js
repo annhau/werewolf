@@ -52,8 +52,10 @@ class Player {
             oplayer.hunted = true;
         else if (this.active_wolf !== null) {
             if (!oplayer.protected) {
-                if (oplayer.role === 'Cursed')
+                if (oplayer.role === 'Cursed') {
                     oplayer.role = 'Werewolf';
+                    oplayer.active_wolf = 69
+                }
                 else
                     oplayer.bitten = true;
             }
@@ -75,7 +77,9 @@ class SetUpPlayer extends Component {
         let inp = capitalize(this.refs.player.value);
         if (inp !== "" && !playerNames.includes(inp)) {
             playerNames.push(inp);
-            this.setState({'playerNames': playerNames})
+            this.setState({'playerNames': playerNames, error: null})
+        } else {
+            this.setState({error: "Do not use the same name"})
         }
         this.refs.player.focus();
         this.refs.player.value = "";
@@ -85,21 +89,22 @@ class SetUpPlayer extends Component {
         let row = [];
         let playerNames = this.state.playerNames;
         this.state.playerNames.forEach(n => row.push(
-            <li className="text-center list-group-item list-group-item-action" key={n}>{n}</li>));
+            <li className="" key={n}>{n}</li>));
         return (
             <div>
                 <h3>Add players to the game</h3>
-                <ul className="mb-3 list-group">{row}</ul>
+                {this.state.error ? <p className="text-danger"> {this.state.error}</p> : null}
+                <ul className="mb-3">{row}</ul>
                 <form className="form-inline" onSubmit={(e) => this.addPlayer.bind(this)(e)}>
                     <div className="input-group mb-3">
                         <input type="text" className="form-control" ref="player"/>
                         <div className="input-group-append">
-                            <button className="btn btn-outline-secondary" type="submit">Add</button>
+                            <button className="btn btn-danger" type="submit">Add</button>
                         </div>
                     </div>
 
                 </form>
-                <button className="btn btn-primary" onClick={() => this.props.submitPlayerNames(playerNames)}>Done
+                <button className="btn btn-danger" onClick={() => this.props.submitPlayerNames(playerNames)}>Done
                 </button>
             </div>
         );
@@ -131,17 +136,19 @@ class SetUpRole extends Component {
             for (let i = 0; i < count; i++)
                 playerRoles.push(role);
         });
+        if (playerRoles.length !== this.props.playerNames.length) return;
         shuffleArray(playerRoles);
 
         let playerList = [];
         let wolfNo = 1;
         this.props.playerNames.forEach((n, index) => {
             let p = new Player(n, playerRoles[index]);
+
             if (p.role === 'Werewolf') {
                 p.active_wolf = wolfNo;
                 wolfNo += 1
             }
-            playerList.push(p)
+            playerList.push(p); console.log(p.pname, ':', p.role, p.active_wolf);
         });
         this.props.submitPlayer(playerList);
     }
@@ -150,15 +157,22 @@ class SetUpRole extends Component {
         let row = [];
         let error = this.state.numPlayer < 0 ? <p className="text-danger"> Number of roles is not correct </p> : null;
         ROLES.forEach(role => row.push(
-            <li className="list-group-item list-group-item-action" key={role}>
-                <div className="row">
-                    <div className="col-10 text-center">{role}</div>
-                    <div className="col-2 text-left">
-                        <input ref={role} className="form-control float-right" style={{width: "100px"}} type="number"
-                               min="0"
-                               onChange={this.changeSelectRemain.bind(this)}/>
-                    </div>
-                </div>
+            <li className="list-group-item" key={role}>
+                {role}
+                <span className="btn float-right"
+                      onClick={() => {
+                          this.refs[role].value = Number(this.refs[role].value) + 1;
+                          this.changeSelectRemain()
+                      }}> <i className="fas fa-plus-circle text-white" />
+                </span>
+                <input ref={role} className="form-control float-right" style={{width: "80px", textAlign: "center"}} type="number" readOnly/>
+                <span className="btn float-right" onClick={() => {
+                    this.refs[role].value = this.refs[role].value > 0 ? Number(this.refs[role].value) - 1 : this.refs[role].value;
+                    this.changeSelectRemain();
+                }
+                }> <i className="fas fa-minus-circle text-white" />
+                </span>
+
             </li>)
         );
         return (
@@ -171,7 +185,7 @@ class SetUpRole extends Component {
                 </ul>
                 <br/>
                 {error ? error :
-                    <button className="btn btn-primary" onClick={this.createPlayers.bind(this)}>Done</button>}
+                    <button className="btn btn-danger" onClick={this.createPlayers.bind(this)}>Done</button>}
             </div>
         );
     }
@@ -193,9 +207,12 @@ class Night extends Component {
         e.preventDefault();
         let actions = this.state.actions;
         this.props.players.forEach((player, index) => {
-            if (this.refs[player.pname].checked) {
+            let refDiv = this.refs[player.pname];
+            let checkbox = refDiv.childNodes[0];
+            if (checkbox.checked) {
                 actions[this.state.currentIndex] = index;
-                this.refs[player.pname].checked = false;
+                checkbox.checked = false;
+                refDiv.style.background = 'lightcoral';
             }
         });
 
@@ -214,13 +231,25 @@ class Night extends Component {
         }
     }
 
+    changeColor() {
+        this.props.players.forEach((player, index) => {
+            let divRef = this.refs[player.pname];
+            if (divRef.childNodes[0].checked) {
+                divRef.style.background = 'red';
+            } else {
+                divRef.style.background = 'lightcoral';
+            }
+        });
+    }
+
     render() {
         let row = [];
         this.props.players.forEach((player, index) => {
-            let inp = <div key={player.pname} className="custom-control custom-radio">
-                <input ref={player.pname} type="radio" id={player.pname} name="target" className="custom-control-input"
+            let inp = <div ref={player.pname} key={player.pname} className="radio-div"
+                           onClick={this.changeColor.bind(this)}>
+                <input type="radio" id={player.pname} name="target" className="radio-input"
                        required/>
-                <label className="custom-control-label" htmlFor={player.pname}>{player.pname}</label>
+                <label className="radio-label" htmlFor={player.pname}>{player.pname}</label>
             </div>;
             row.push(inp)
         });
@@ -230,7 +259,7 @@ class Night extends Component {
                 <h3>Turn of {this.state.currentPlayer.pname}</h3>
                 <form onSubmit={(e) => this.addAction.bind(this)(e)}>
                     {row}
-                    <button type="submit" className="mt-3 btn btn-primary">Next</button>
+                    <button type="submit" className="mt-3 btn btn-danger">Next</button>
                 </form>
             </div>
         );
@@ -242,19 +271,32 @@ class Day extends Component {
     executePlayer(e) {
         e.preventDefault();
         this.props.players.forEach((player, index) => {
-            if (this.refs[player.pname].checked) {
+            if (this.refs[player.pname].childNodes[0].checked) {
                 this.props.executePlayer(player)
             }
         });
     }
 
+    changeColor() {
+        this.props.players.forEach((player, index) => {
+            let divRef = this.refs[player.pname];
+            if (divRef.childNodes[0].checked) {
+                divRef.style.background = 'red';
+            } else {
+                divRef.style.background = 'lightcoral';
+            }
+        });
+    }
+
+
     render() {
         let row = [];
         this.props.players.forEach((player, index) => {
-            let inp = <div key={player.pname} className="custom-control custom-radio">
-                <input ref={player.pname} type="radio" id={player.pname} name="target" className="custom-control-input"
+            let inp = <div ref={player.pname} key={player.pname} className="radio-div"
+                           onClick={this.changeColor.bind(this)}>
+                <input type="radio" id={player.pname} name="target" className="radio-input"
                        required/>
-                <label className="custom-control-label" htmlFor={player.pname}>{player.pname}</label>
+                <label className="radio-label" htmlFor={player.pname}>{player.pname}</label>
             </div>;
             row.push(inp)
         });
@@ -271,13 +313,13 @@ class Day extends Component {
                     ? <div>
                         <h3>{this.props.gameOver}</h3>
                         <ul>{originPlayers}</ul>
-                        <button onClick={() => this.props.restart()} className="btn btn-primary">New game</button>
+                        <button onClick={() => this.props.restart()} className="btn btn-danger">New game</button>
                     </div>
                     : <div>
                         <h3> Who's the wolf ? </h3>
                         <form onSubmit={(e) => this.executePlayer.bind(this)(e)}>
                             {row}
-                            <button type="submit" className="mt-3 mr-3 btn btn-primary">Execute</button>
+                            <button type="submit" className="mt-3 mr-3 btn btn-danger">Execute</button>
                             <button onClick={() => this.props.nextPhase()} className="mt-3 btn btn-secondary">Skip
                             </button>
                         </form>
@@ -304,10 +346,8 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            phase: 'night',
-            players: DUMP_PLAYERS,
-            // phase: 'setUpName',
-            // players: [],
+            phase: 'setUpName',
+            players: [],
             playerNames: [],
             night: 1,
         }
@@ -320,10 +360,12 @@ class App extends Component {
     }
 
     submitPlayerNames(names) {
-        this.setState({
-            playerNames: names,
-            phase: 'setUpRole'
-        })
+        if (names.length !== 0) {
+            this.setState({
+                playerNames: names,
+                phase: 'setUpRole'
+            })
+        }
     }
 
     submitPlayer(players) {
@@ -344,20 +386,24 @@ class App extends Component {
         }
     }
 
+    getActiveWolf() {
+        return this.state.players.filter(e => e.active_wolf !== null)
+            .reduce((prev, current) => (prev.active_wolf < current.active_wolf) ? prev : current)
+    }
+
     submitActions(actions) {
         let players = this.state.players;
 
         // Handle Actions
-        let bitten = false;
+        let activeWolf = this.getActiveWolf(); console.log(activeWolf);
         ROLES.forEach(role => {
             players.forEach((player, index) => {
                 if (player.role === role) {
                     let target = players[actions[index]];
                     if (player.role !== 'Werewolf') {
                         player.do_action(target);
-                    } else if (!bitten) {
+                    } else if (player === activeWolf) {
                         player.do_action(target);
-                        bitten = true;
                     }
                 }
             })
@@ -414,6 +460,7 @@ class App extends Component {
             phase: 'setUpName',
             players: [],
             playerNames: [],
+            events: [],
             night: 1,
         })
     }
