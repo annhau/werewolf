@@ -1,13 +1,13 @@
 {
-  "main.css": "/werewolf/static/css/main.03569a7a.chunk.css",
-  "main.js": "/werewolf/static/js/main.a8d9932b.chunk.js",
-  "main.js.map": "/werewolf/static/js/main.a8d9932b.chunk.js.map",
+  "main.css": "/werewolf/static/css/main.a0147a3c.chunk.css",
+  "main.js": "/werewolf/static/js/main.336bfe27.chunk.js",
+  "main.js.map": "/werewolf/static/js/main.336bfe27.chunk.js.map",
   "runtime~main.js": "/werewolf/static/js/runtime~main.1b490474.js",
   "runtime~main.js.map": "/werewolf/static/js/runtime~main.1b490474.js.map",
-  "static/js/2.8878cd68.chunk.js": "/werewolf/static/js/2.8878cd68.chunk.js",
-  "static/js/2.8878cd68.chunk.js.map": "/werewolf/static/js/2.8878cd68.chunk.js.map",
+  "static/js/2.d53f7cd5.chunk.js": "/werewolf/static/js/2.d53f7cd5.chunk.js",
+  "static/js/2.d53f7cd5.chunk.js.map": "/werewolf/static/js/2.d53f7cd5.chunk.js.map",
   "index.html": "/werewolf/index.html",
-  "precache-manifest.de5ed15e691b5cbdae0bd2c220308365.js": "/werewolf/precache-manifest.de5ed15e691b5cbdae0bd2c220308365.js",
+  "precache-manifest.e134ab629e3032c52d17bf785a25c4bf.js": "/werewolf/precache-manifest.e134ab629e3032c52d17bf785a25c4bf.js",
   "service-worker.js": "/werewolf/service-worker.js",
-  "static/css/main.03569a7a.chunk.css.map": "/werewolf/static/css/main.03569a7a.chunk.css.map"
+  "static/css/main.a0147a3c.chunk.css.map": "/werewolf/static/css/main.a0147a3c.chunk.css.map"
 }
