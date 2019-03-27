@@ -30,7 +30,7 @@ export class SetUpPlayer extends Component {
         this.state.playerNames.forEach(n => row.push(
             <li className="" key={n}>{n}</li>));
         return (
-            <div>
+            <div className="animated zoomIn">
                 <h3>Add players to the game</h3>
                 {this.state.error ? <p className="text-danger"> {this.state.error}</p> : null}
                 <ul className="mb-3">{row}</ul>

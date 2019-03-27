@@ -32,33 +32,6 @@
   }
 }
 
-.fadeOut-enter {
-    opacity: 0.01;
-}
-
-.fadeOut-enter.fadeOut-enter-active {
-    opacity: 1;
-    transition: opacity 500ms ease-in;
-}
-
-.fadeOut-leave {
-    opacity: 1;
-}
-
-.fadeOut-leave.fadeOut-leave-active {
-    opacity: 0.01;
-    transition: opacity 500ms ease-out;
-}
-
-.fadeOut-appear {
-    opacity: 0.01;
-}
-
-.fadeOut-appear.fadeOut-appear-active {
-    opacity: 1;
-    transition: opacity 500ms ease-in;
-}
-
 @keyframes changeColor {
     from {color: red;}
     to {color: black;}
@@ -81,4 +54,3 @@
         transform: translate3d(4px, 0, 0);
     }
 }
-

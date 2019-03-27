@@ -36,9 +36,9 @@ export class Day extends Component {
             row.push(inp)
         });
         let originPlayers = this.props.originPlayers.map(player =>
-            <li>{player.pname}: {player.role} {player.active_wolf}</li>);
+            <li key={'origin'+player.pname}>{player.pname}: {player.role} {player.active_wolf}</li>);
         return (
-            <div>
+            <div className="animated fadeInLeft" key={this.props.night}>
                 <h3>Events: </h3>
                 <ul>
                     {this.props.events ? this.props.events : "Nothing happened"}
@@ -60,7 +60,6 @@ export class Day extends Component {
                             <button onClick={() => this.props.nextPhase()} className="mt-3 btn btn-secondary">Skip
                             </button>
                         </form>
-
                     </div>
                 }
             </div>

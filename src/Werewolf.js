@@ -86,7 +86,7 @@ class App extends Component {
         // Handle Actions
         let activeWolf = this.getActiveWolf();
         let logs = this.state.logs;
-        logs.push(<p><b>Night {this.state.night}</b></p>);
+        logs.push(<p key={'log-title'+this.state.night}><b>Night {this.state.night}</b></p>);
         ROLES.forEach(role => {
             players.forEach((player, index) => {
                 if (player.role === role) {
@@ -97,7 +97,7 @@ class App extends Component {
                         player.do_action(target);
                     }
                     // Add logs
-                    logs.push(<li>{player.role}{player.active_wolf} choose {target.role}{target.active_wolf}</li>)
+                    logs.push(<li key={'log'+logs.length}>{player.role}{player.active_wolf} choose {target.role}{target.active_wolf}</li>)
                 }
             })
         });
@@ -107,20 +107,20 @@ class App extends Component {
         let events = [];
         players.forEach((player) => {
             if (player.bitten) {
-                events.push(<li key={player.id}>{player.pname} died.</li>);
+                events.push(<li key={'die-event'+player.id}>{player.pname} died.</li>);
                 dead_players.push(player);
                 if (player.role === 'Hunter' && player.previous_target !== player) {
-                    events.push(<li key={player.previous_target.id}>{player.previous_target.pname} died.</li>);
+                    events.push(<li key={'die-event'+player.previous_target.id}>{player.previous_target.pname} died.</li>);
                     dead_players.push(player.previous_target);
                 }
             }
             if (player.muted)
-                events.push(<li key={player.id}>{player.pname} is muted.</li>);
+                events.push(<li key={'mute-event'+player.id}>{player.pname} is muted.</li>);
             if (player.seer) {
                 if (player.bitten)
-                    events.push(<li key={player.id}>{player.pname} needs to tell truth</li>);
+                    events.push(<li key={'truth-event'+player.id}>{player.pname} needs to tell truth</li>);
                 else
-                    events.push(<li key={player.id}>{player.pname} needs to tell truth
+                    events.push(<li key={'truth-event'+player.id}>{player.pname} needs to tell truth
                         (truth: {player.previous_target.pname})</li>)
             }
             player.init_stats();
@@ -193,6 +193,7 @@ class App extends Component {
                           submitActions={this.submitActions.bind(this)}/>;
         else if (phase === 'day')
             return <Day events={this.state.events}
+                        night={this.state.night}
                         nextPhase={this.nextPhase.bind(this)}
                         players={this.state.players}
                         originPlayers={this.state.originPlayers}

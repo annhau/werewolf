@@ -74,7 +74,7 @@ export class SetUpRole extends Component {
         let doneButton = error ? error :
             <button className="btn btn-danger" onClick={this.createPlayers.bind(this)}>Done</button>;
         return (
-            <div>
+            <div className="animated slideInRight">
                 <h3>Select roles: {remaining}</h3>
                 <ul className="list-group" id="roleSelection">
                     {this.createSelection()}

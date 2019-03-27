@@ -62,17 +62,13 @@ export class Night extends Component {
             </div>
         );
         return (
-            <div key={currentPlayer}>
-                <CSSTransitionGroup
-                    transitionName="fadeOut" transitionAppear={true}
-                    transitionEnter={true} transitionLeave={true}>
+            <div ref='main' key={currentPlayer} >
                 <h2>Night {this.props.night}</h2>
                 <h3>Turn of <span className="text-white"> {currentPlayer}</span></h3>
                     <form onSubmit={(e) => this.addAction.bind(this)(e)}>
                         {row}
                         <button type="submit" className="mt-3 btn btn-danger">Next</button>
                     </form>
-                </CSSTransitionGroup>
             </div>
         );
     }
