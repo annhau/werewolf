@@ -21,7 +21,7 @@ export class Night extends Component {
         e.preventDefault();
 
         // Blank the page
-        this.refs['main'].innerHTML = '<img alt="spinner" src="https://thumbs.gfycat.com/CarelessOccasionalArgusfish-small.gif" height="40px" />' ;
+        this.refs['main'].outerHTML = '<img alt="spinner" src="https://thumbs.gfycat.com/CarelessOccasionalArgusfish-small.gif" height="30px" />' ;
         await sleep(200);
 
         let actions = this.state.actions;
