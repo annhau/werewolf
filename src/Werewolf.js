@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
-import {CSSTransitionGroup} from 'react-transition-group' // ES6
 import './App.css';
 import {SetUpPlayer} from "./SetUpPlayer";
-import {Player} from "./Player";
 import {SetUpRole} from "./SetUpRole";
 import {Night} from "./Night";
 import {Day} from "./Day";
@@ -19,17 +17,6 @@ export function shuffleArray(array) {
     }
 }
 
-
-let albert = new Player('Albert', 'Werewolf');
-albert.active_wolf = 1;
-let goldy = new Player('Goldy', 'Werewolf');
-goldy.active_wolf = 2;
-const DUMP_PLAYERS = [albert, goldy,
-    new Player('Alice', 'Seer'),
-    new Player('Golden', 'Hunter'),
-    new Player('Goldeny', 'Villager'),
-];
-
 class App extends Component {
     constructor(props) {
         super(props);
@@ -37,15 +24,10 @@ class App extends Component {
             phase: 'setUpName',
             players: [],
             playerNames: [],
+            events: [],
             night: 1,
             logs: [],
         }
-    }
-
-    nextPhase() {
-        this.setState((state, props) => {
-            return {phase: 'night', night: state.night + 1}
-        })
     }
 
     submitPlayerNames(names) {
@@ -86,7 +68,7 @@ class App extends Component {
         // Handle Actions
         let activeWolf = this.getActiveWolf();
         let logs = this.state.logs;
-        logs.push(<p key={'log-title'+this.state.night}><b>Night {this.state.night}</b></p>);
+        logs.push(<p key={'log-title' + this.state.night}><b>Night {this.state.night}</b></p>);
         ROLES.forEach(role => {
             players.forEach((player, index) => {
                 if (player.role === role) {
@@ -97,7 +79,8 @@ class App extends Component {
                         player.do_action(target);
                     }
                     // Add logs
-                    logs.push(<li key={'log'+logs.length}>{player.role}{player.active_wolf} choose {target.role}{target.active_wolf}</li>)
+                    logs.push(<li
+                        key={'log' + logs.length}>{player.role}{player.active_wolf} choose {target.role}{target.active_wolf}</li>)
                 }
             })
         });
@@ -107,20 +90,21 @@ class App extends Component {
         let events = [];
         players.forEach((player) => {
             if (player.bitten) {
-                events.push(<li key={'die-event'+player.id}>{player.pname} died.</li>);
+                events.push(<li key={'die-event' + player.id}>{player.pname} died.</li>);
                 dead_players.push(player);
                 if (player.role === 'Hunter' && player.previous_target !== player) {
-                    events.push(<li key={'die-event'+player.previous_target.id}>{player.previous_target.pname} died.</li>);
+                    events.push(<li
+                        key={'die-event' + player.previous_target.id}>{player.previous_target.pname} died.</li>);
                     dead_players.push(player.previous_target);
                 }
             }
             if (player.muted)
-                events.push(<li key={'mute-event'+player.id}>{player.pname} is muted.</li>);
+                events.push(<li key={'mute-event' + player.id}>{player.pname} is muted.</li>);
             if (player.seer) {
                 if (player.bitten)
-                    events.push(<li key={'truth-event'+player.id}>{player.pname} needs to tell truth</li>);
+                    events.push(<li key={'truth-event' + player.id}>{player.pname} needs to tell truth</li>);
                 else
-                    events.push(<li key={'truth-event'+player.id}>{player.pname} needs to tell truth
+                    events.push(<li key={'truth-event' + player.id}>{player.pname} needs to tell truth
                         (truth: {player.previous_target.pname})</li>)
             }
             player.init_stats();
@@ -194,7 +178,6 @@ class App extends Component {
         else if (phase === 'day')
             return <Day events={this.state.events}
                         night={this.state.night}
-                        nextPhase={this.nextPhase.bind(this)}
                         players={this.state.players}
                         originPlayers={this.state.originPlayers}
                         executePlayer={this.executePlayer.bind(this)}

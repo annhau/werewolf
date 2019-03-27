@@ -3,6 +3,10 @@ import {CSSTransitionGroup} from 'react-transition-group' // ES6
 import './App.css';
 
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export class Night extends Component {
     constructor(props) {
         super(props);
@@ -13,8 +17,13 @@ export class Night extends Component {
         }
     }
 
-    addAction(e) {
+    async addAction(e) {
         e.preventDefault();
+
+        // Blank the page
+        this.refs['main'].innerHTML = '<img alt="spinner" src="https://thumbs.gfycat.com/CarelessOccasionalArgusfish-small.gif" height="40px" />' ;
+        await sleep(200);
+
         let actions = this.state.actions;
         this.props.players.forEach((player, index) => {
             let refDiv = this.refs[player.pname];
@@ -62,13 +71,13 @@ export class Night extends Component {
             </div>
         );
         return (
-            <div ref='main' key={currentPlayer} >
+            <div key={currentPlayer} className="animated fadeIn">
                 <h2>Night {this.props.night}</h2>
                 <h3>Turn of <span className="text-white"> {currentPlayer}</span></h3>
-                    <form onSubmit={(e) => this.addAction.bind(this)(e)}>
-                        {row}
-                        <button type="submit" className="mt-3 btn btn-danger">Next</button>
-                    </form>
+                <form onSubmit={(e) => this.addAction.bind(this)(e)}>
+                    {row}
+                    <button ref='main' type="submit" className="mt-3 btn btn-danger">Next</button>
+                </form>
             </div>
         );
     }

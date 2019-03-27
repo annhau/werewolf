@@ -1,6 +1,10 @@
 import React, {Component} from "react";
 
 export class Day extends Component {
+    skipExecute() {
+        this.props.executePlayer(null);
+    }
+
     executePlayer(e) {
         e.preventDefault();
         this.props.players.forEach((player, index) => {
@@ -23,7 +27,6 @@ export class Day extends Component {
         });
     }
 
-
     render() {
         let row = [];
         this.props.players.forEach((player, index) => {
@@ -36,7 +39,7 @@ export class Day extends Component {
             row.push(inp)
         });
         let originPlayers = this.props.originPlayers.map(player =>
-            <li key={'origin'+player.pname}>{player.pname}: {player.role} {player.active_wolf}</li>);
+            <li key={'origin' + player.pname}>{player.pname}: {player.role} {player.active_wolf}</li>);
         return (
             <div className="animated fadeInLeft" key={this.props.night}>
                 <h3>Events: </h3>
@@ -57,7 +60,7 @@ export class Day extends Component {
                         <form onSubmit={(e) => this.executePlayer.bind(this)(e)}>
                             {row}
                             <button type="submit" className="mt-3 mr-3 btn btn-danger">Execute</button>
-                            <button onClick={() => this.props.nextPhase()} className="mt-3 btn btn-secondary">Skip
+                            <button onClick={this.skipExecute.bind(this)} className="mt-3 btn btn-secondary">Skip
                             </button>
                         </form>
                     </div>
