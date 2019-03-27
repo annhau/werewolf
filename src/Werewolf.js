@@ -1,344 +1,21 @@
 import React, {Component} from 'react';
-import { CSSTransitionGroup } from 'react-transition-group' // ES6
-
+import {CSSTransitionGroup} from 'react-transition-group' // ES6
 import './App.css';
+import {SetUpPlayer} from "./SetUpPlayer";
+import {Player} from "./Player";
+import {SetUpRole} from "./SetUpRole";
+import {Night} from "./Night";
+import {Day} from "./Day";
 
 
-const ROLES = ['Maria', 'Guard', 'Spell Caster', 'Seer', 'Hunter', 'Werewolf', 'Cursed', 'Villager'];
+export const ROLES = ['Maria', 'Guard', 'Spell Caster', 'Seer', 'Hunter', 'Werewolf', 'Cursed', 'Villager'];
 
-function capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-function shuffleArray(array) {
+export function shuffleArray(array) {
     for (var i = array.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
         var temp = array[i];
         array[i] = array[j];
         array[j] = temp;
-    }
-}
-
-
-class Player {
-    constructor(pname, role) {
-        this.pname = pname;
-        this.role = role;
-        this.active_wolf = null;
-        this.init_stats();
-    }
-
-    init_stats() {
-        this.bitten = false;
-        this.protected = false;
-        this.seer = false;
-        this.muted = false;
-        this.hunted = false;
-        this.disabled = false;
-        this.previous_target = null;
-    }
-
-    do_action(oplayer) {
-        this.previous_target = oplayer;
-        if (this.disabled) return;
-        let r = this.role;
-        if (r === 'Maria')
-            oplayer.disabled = true;
-        else if (r === 'Guard')
-            oplayer.protected = true;
-        else if (r === 'Spell Caster')
-            oplayer.muted = true;
-        else if (r === 'Seer')
-            oplayer.seer = true;
-        else if (r === 'Hunter')
-            oplayer.hunted = true;
-        else if (this.active_wolf !== null) {
-            if (!oplayer.protected) {
-                if (oplayer.role === 'Cursed') {
-                    oplayer.role = 'Werewolf';
-                    oplayer.active_wolf = 69
-                }
-                else
-                    oplayer.bitten = true;
-            }
-        }
-    }
-}
-
-class SetUpPlayer extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            playerNames: []
-        }
-    }
-
-    addPlayer(e) {
-        e.preventDefault();
-        let playerNames = this.state.playerNames.slice();
-        let inp = capitalize(this.refs.player.value).trim();
-        if (inp === ""){
-            this.setState({error: "Do not use empty string"})
-        } else if (playerNames.includes(inp)) {
-            this.setState({error: "Do not use the same name"});
-        } else {
-            playerNames.push(inp);
-            this.setState({'playerNames': playerNames, error: null})
-        }
-        this.refs.player.focus();
-        this.refs.player.value = "";
-    }
-
-    render() {
-        let row = [];
-        let playerNames = this.state.playerNames;
-        this.state.playerNames.forEach(n => row.push(
-            <li className="" key={n}>{n}</li>));
-        return (
-            <div>
-                <h3>Add players to the game</h3>
-                {this.state.error ? <p className="text-danger"> {this.state.error}</p> : null}
-                <ul className="mb-3">{row}</ul>
-                <form className="form-inline" onSubmit={(e) => this.addPlayer.bind(this)(e)}>
-                    <div className="input-group mb-3">
-                        <input type="text" className="form-control" ref="player"/>
-                        <div className="input-group-append">
-                            <button className="btn btn-danger" type="submit">Add</button>
-                        </div>
-                    </div>
-
-                </form>
-                <button className="btn btn-danger" onClick={() => this.props.submitPlayerNames(playerNames)}>Done
-                </button>
-            </div>
-        );
-    }
-}
-
-class SetUpRole extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            numPlayer: this.props.playerNames.length,
-        }
-    };
-
-    changeSelectRemain() {
-        let total = 0;
-        ROLES.forEach(role => {
-            let count = Number(this.refs[role].value);
-            if (count > 0)
-                total += count
-        });
-        this.setState({numPlayer: this.props.playerNames.length - total});
-    }
-
-    createPlayers() {
-        let playerRoles = [];
-        ROLES.forEach(role => {
-            let count = Number(this.refs[role].value);
-            for (let i = 0; i < count; i++)
-                playerRoles.push(role);
-        });
-        if (playerRoles.length !== this.props.playerNames.length) return;
-        shuffleArray(playerRoles);
-
-        let playerList = [];
-        let wolfNo = 1;
-        this.props.playerNames.forEach((n, index) => {
-            let p = new Player(n, playerRoles[index]);
-
-            if (p.role === 'Werewolf') {
-                p.active_wolf = wolfNo;
-                wolfNo += 1
-            }
-            playerList.push(p); console.log(p.pname, ':', p.role, p.active_wolf);
-        });
-        this.props.submitPlayer(playerList);
-    }
-
-    render() {
-        let row = [];
-        let error = this.state.numPlayer < 0 ? <p className="text-danger"> Number of roles is not correct </p> : null;
-        ROLES.forEach(role => row.push(
-            <li className="list-group-item" key={role}>
-                {role}
-                <span className="btn float-right"
-                      onClick={() => {
-                          this.refs[role].value = Number(this.refs[role].value) + 1;
-                          this.changeSelectRemain()
-                      }}> <i className="fas fa-plus-circle text-white" />
-                </span>
-                <input ref={role} className="form-control float-right roleInput" type="text" readOnly/>
-                <span className="btn float-right" onClick={() => {
-                    this.refs[role].value = this.refs[role].value > 0 ? Number(this.refs[role].value) - 1 : this.refs[role].value;
-                    this.changeSelectRemain();
-                }
-                }> <i className="fas fa-minus-circle text-white" />
-                </span>
-
-            </li>)
-        );
-        return (
-            <div>
-                <h3>Select roles: {this.state.numPlayer > 0 ? this.state.numPlayer + ' remain' : null}
-                </h3>
-                {this.state.error ? <p className="text-danger"> this.state.error </p> : null}
-                <ul className="list-group">
-                    {row}
-                </ul>
-                <br/>
-                {error ? error :
-                    <button className="btn btn-danger" onClick={this.createPlayers.bind(this)}>Done</button>}
-            </div>
-        );
-    }
-}
-
-
-class Night extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            night: this.props.night,
-            currentPlayer: this.props.players[0],
-            currentIndex: 0,
-            actions: {},
-        }
-    }
-
-    addAction(e) {
-        e.preventDefault();
-        let actions = this.state.actions;
-        this.props.players.forEach((player, index) => {
-            let refDiv = this.refs[player.pname];
-            let checkbox = refDiv.childNodes[0];
-            if (checkbox.checked) {
-                actions[this.state.currentIndex] = index;
-                checkbox.checked = false;
-                refDiv.style.background = '';
-                refDiv.style.color = '';
-            }
-        });
-
-        this.setState({actions: actions});
-
-        let index = this.state.currentIndex;
-        index += 1;
-        if (index === this.props.players.length) {
-            this.props.submitActions(this.state.actions);
-        } else {
-            let currentPlayer = this.props.players[index];
-            this.setState({
-                currentPlayer: currentPlayer,
-                currentIndex: index
-            });
-        }
-    }
-
-    changeColor() {
-        this.props.players.forEach((player, index) => {
-            let divRef = this.refs[player.pname];
-            if (divRef.childNodes[0].checked) {
-                divRef.style.background = 'red';
-                divRef.style.color = 'white';
-            } else {
-                divRef.style.background = 'lightcoral';
-                divRef.style.color = '';
-            }
-        });
-    }
-
-    render() {
-        let row = [];
-        this.props.players.forEach((player, index) => {
-            let inp = <div ref={player.pname} key={player.pname} className="radio-div"
-                           onClick={this.changeColor.bind(this)}>
-                <input type="radio" id={player.pname} name="target" className="radio-input"
-                       required/>
-                <label className="radio-label" htmlFor={player.pname}>{player.pname}</label>
-            </div>;
-            row.push(inp)
-        });
-        return (
-            <div>
-                <h2>Night {this.state.night}</h2>
-                <h3>Turn of <span className="text-white"> {this.state.currentPlayer.pname}</span></h3>
-                <form onSubmit={(e) => this.addAction.bind(this)(e)}>
-                     {row}
-                    <button type="submit" className="mt-3 btn btn-danger">Next</button>
-                </form>
-            </div>
-        );
-    }
-}
-
-
-class Day extends Component {
-    executePlayer(e) {
-        e.preventDefault();
-        this.props.players.forEach((player, index) => {
-            if (this.refs[player.pname].childNodes[0].checked) {
-                this.props.executePlayer(player)
-            }
-        });
-    }
-
-    changeColor() {
-        this.props.players.forEach((player, index) => {
-            let divRef = this.refs[player.pname];
-            if (divRef.childNodes[0].checked) {
-                divRef.style.background = 'red';
-                divRef.style.color = 'white';
-            } else {
-                divRef.style.background = '';
-                divRef.style.color = '';
-            }
-        });
-    }
-
-
-    render() {
-        let row = [];
-        this.props.players.forEach((player, index) => {
-            let inp = <div ref={player.pname} key={player.pname} className="radio-div"
-                           onClick={this.changeColor.bind(this)}>
-                <input type="radio" id={player.pname} name="target" className="radio-input"
-                       required/>
-                <label className="radio-label" htmlFor={player.pname}>{player.pname}</label>
-            </div>;
-            row.push(inp)
-        });
-        let originPlayers = this.props.originPlayers.map(player =>
-            <li>{player.pname}: {player.role} {player.active_wolf}</li>);
-        return (
-            <div>
-                <h3>Events: </h3>
-                <ul>
-                    {this.props.events ? this.props.events : "Nothing happened"}
-                </ul>
-
-                {this.props.gameOver !== null
-                    ? <div>
-                        <h3>{this.props.gameOver}</h3>
-                        <ul>{originPlayers}</ul>
-                        <h3>History</h3>
-                        <ul>{this.props.logs}</ul>
-                        <button onClick={() => this.props.restart()} className="btn btn-danger">New game</button>
-                    </div>
-                    : <div>
-                        <h3> Who's the wolf ? </h3>
-                        <form onSubmit={(e) => this.executePlayer.bind(this)(e)}>
-                            {row}
-                            <button type="submit" className="mt-3 mr-3 btn btn-danger">Execute</button>
-                            <button onClick={() => this.props.nextPhase()} className="mt-3 btn btn-secondary">Skip
-                            </button>
-                        </form>
-
-                    </div>
-                }
-            </div>
-        );
     }
 }
 
@@ -407,7 +84,7 @@ class App extends Component {
         let players = this.state.players;
 
         // Handle Actions
-        let activeWolf = this.getActiveWolf(); console.log(activeWolf);
+        let activeWolf = this.getActiveWolf();
         let logs = this.state.logs;
         logs.push(<p><b>Night {this.state.night}</b></p>);
         ROLES.forEach(role => {
@@ -525,7 +202,6 @@ class App extends Component {
         else
             return <div> {phase} </div>
     }
-
 }
 
 export default App;

@@ -38,7 +38,7 @@
 
 .fadeOut-enter.fadeOut-enter-active {
     opacity: 1;
-    transition: opacity 2000ms ease-in;
+    transition: opacity 500ms ease-in;
 }
 
 .fadeOut-leave {
