@@ -1,68 +1,57 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Werewolf Game (blind version)
+This game is an alternative of [Ultimate Werewolf](https://en.wikipedia.org/wiki/Ultimate_Werewolf) 
+where all players don't know about their role. The only one that know it is The Host. 
+At night, everyone perform their actions by choosing a player. At day, The Host informs what was the result of performed actions last night. 
+With that information, the players have to figure out what their role is, which
+side they are in, and what they need to do to win the game.
 
-## Available Scripts
+So, The Host needs to remember and process a lot of information every night. This app works as
+an assistant to help it. 
 
-In the project directory, you can run:
-
+## Run
 ### `npm start`
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+## Game
+(_I designed this app to fit phone screens_)
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Setup players
+Add players to the game.
 
-### `npm run build`
+![img.png](img.png)
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+### Setup roles
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Maria: The ability of the player chose by her will be disabled for that night (for example, if he is a werewolf, his bite won't cause any damage).
+- Guard: The player chose by him will be protected (won't die if be bitten).
+- Spell Caster: The player chose by her will be muted (can't talk the day after).
+- Seer: The player chose by him needs to tell which person they chose last night.
+- Hunter: If the hunter is bitten, the player chose by him will be dead too.
+- Werewolf: The player chose by werewolf will be dead the next day. If there are more than 1 werewolf, 
+only the bite of the first werewolf matters (if the first werewolf is dead, the next one does, and so on).
+- Cursed: If the cursed is bitten the first time, he becomes a werewolf.
+- Villager: Eh... nothing special.
 
-### `npm run eject`
+![img_1.png](img_1.png)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### At night
+Everyone chooses a player to perform their action (which can be themselves).
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+![img_3.png](img_3.png)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
+### At day
+The app shows what is the result of those actions. Now everybody discuss and vote for the one they think is a werewolf, or skip the execution if they have no idea yet.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+![img_4.png](img_4.png)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
+### Game over
+when all the wolf are dead, or they have killed enough, the game ends.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+Now the app shows roles of everybody and all actions made.
 
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+![img_5.png](img_5.png)
